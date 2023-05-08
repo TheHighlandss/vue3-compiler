@@ -1,0 +1,14 @@
+lockfileVersion: 5.4
+
+specifiers:
+  jiti: ^1.18.2
+
+dependencies:
+  jiti: 1.18.2
+
+packages:
+
+  /jiti/1.18.2:
+    resolution: {integrity: sha512-QAdOptna2NYiSSpv0O/BwoHBSmz4YhpzJHyi+fnMRTXFjp7B8i/YG5Z8IfusxB1ufjcD2Sre1F3R+nX3fvy7gg==}
+    hasBin: true
+    dev: false
