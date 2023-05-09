@@ -2,6 +2,8 @@ const jiti = require('jiti')();
 const { compiler } = jiti('./src/index.ts');
 
 
-const template = `<div>hello</div>`
+const template = `<div><p>Vue</p><p>Template</p></div>`
 const res = compiler(template)
-console.log(res);
+// console.info(res);
+
+// console.log(JSON.stringify(res));
