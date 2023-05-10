@@ -10,8 +10,10 @@ export const compiler = (template) => {
     transform(templateAST)
 
 
-    return templateAST
 
     // 3. 生成渲染函数
-    // const code = generate(jsAST)
+    const code = generate(templateAST.jsNode)
+
+    return code
+
 }

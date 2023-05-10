@@ -7,7 +7,7 @@ const STATE = {
     tagEndName: 6,
 }
 
-export const parse = (template: string) => {
+export const parse = (template: string): astNode => {
     const tokens = tokenize(template)
     console.log('\n****************template转换为tokens****************\n', JSON.parse(JSON.stringify(tokens)));
 

@@ -3,4 +3,5 @@
 const index = require('./index.cjs');
 
 const template = `<div><p>Vue</p><p>Template</p></div>`;
-index.compiler(template);
+const res = index.compiler(template);
+console.log(res);

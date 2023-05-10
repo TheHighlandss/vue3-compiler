@@ -1,6 +1,3 @@
-declare const compiler: (template: any) => {
-    type: string;
-    children: any[];
-};
+declare const compiler: (template: any) => string;
 
 export { compiler };

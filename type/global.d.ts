@@ -9,7 +9,7 @@ declare interface astNode {
     tag?: string
     children?: astNode[]
     content?: string
-    jsNode?: Record<string, any>
+    jsNode?: astJsNode
 }
 
 declare interface transformCtx {
@@ -20,4 +20,26 @@ declare interface transformCtx {
     replaceNode: (a: astNode, b: transformCtx) => void;
     removeNode: (a: astNode, b: transformCtx) => void;
     [key: string]: unknown
+}
+
+declare interface astJsNode {
+    type?: string
+    name?: string
+    value?: string
+    elements?: astJsNode[]
+    callee?: string
+    arguments?: astJsNode[]
+    id?: { type: string, name: string }
+    params?: astJsNode[]
+    body?: astJsNode[]
+    return?: astJsNode
+}
+
+declare interface generateCtx {
+    code: string
+    push: (a: string) => void
+    currentIndent: number
+    newLine: () => void
+    indent: () => void
+    deIndent: () => void
 }

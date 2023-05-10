@@ -158,6 +158,7 @@ function transformRoot(node: astNode) {
         node.jsNode = {
             type: 'FunctionDecl',
             id: createIdentifier('render'),
+            params: [],
             body: [
                 {
                     type: 'ReturnStatement',
