@@ -4,7 +4,9 @@ import { generate } from "./generate"
 
 export const compiler = (template) => {
     const templateAST = parse(template)
+    transform(templateAST)
+
+
     return templateAST
-    // const jsAST = transform(templateAST)
     // const code = generate(jsAST)
 }
