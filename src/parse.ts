@@ -7,7 +7,7 @@ const STATE = {
     tagEndName: 6,
 }
 
-export const parse = (template) => {
+export const parse = (template: string) => {
     const tokens = tokenize(template)
     console.log('\n****************template转换为tokens****************\n', tokens);
     const ast = generateAST(tokens)
@@ -177,7 +177,9 @@ function traverseNode(ast: astNode, ctx: transformCtx) {
     // do something start
     const transforms: Function[] = ctx.nodeTransforms  // nodeTransforms用来存放自定义的回调
     for (let i = 0; i < transforms.length; i++) {
-        transforms[i](ctx.currentNode, ctx) // 
+        transforms[i](ctx.currentNode, ctx)
+        // 如果当前节点被移除了，则不进行后续操作
+        if(!ctx.currentNode) break;
     }
 
     // do something end
@@ -191,6 +193,7 @@ function traverseNode(ast: astNode, ctx: transformCtx) {
     }
 }
 
+/** 节点转换 */
 function transform(ast) {
     const content: transformCtx = {
         currentNode: null, // 当前转换节点
@@ -200,17 +203,37 @@ function transform(ast) {
             transformElement,
             transformText
         ],
-        replaceNode(node) {
-            // ...
+        replaceNode(node, content) {
+            // 节点替换功能
+            content.currentNode = node
+            content.parent.children[content.childIndex] = node
         },
+        removeNode(node, content){
+            // 节点删除功能
+            content.parent.children.splice(content.childIndex , 1)
+            content.currentNode = null
+        }
     }
     // 遍历节点并调用自定义方法 
     traverseNode(ast, content)
 }
 
-function transformElement() {
-
+function transformElement(node) {
+    if (node.type === 'Element' && node.tag === 'p') {
+        node.tag = 'h1'
+    }
 }
-function transformText() {
 
+function transformText(node: astNode, ctx: transformCtx) {
+    if (node.type === 'Text') {
+        node.content = node.content.repeat(2)
+        // 替换节点测试
+        // ctx.replaceNode({
+        //     type: 'Element',
+        //     tag: 'span'
+        // }, ctx)
+
+        // 删除节点测试
+        // ctx.removeNode(node, ctx)
+    }
 }

@@ -8,6 +8,7 @@ declare interface astNode {
     type: string
     tag?: string
     children?: astNode[]
+    content?: string
 }
 
 declare interface transformCtx {
@@ -15,5 +16,7 @@ declare interface transformCtx {
     childIndex: number,
     parent: null | astNode,
     nodeTransforms: Function[]
+    replaceNode: (a:astNode, b:transformCtx) => void ;
+    removeNode: (a:astNode, b:transformCtx) => void ;
     [key: string]: unknown
 }
