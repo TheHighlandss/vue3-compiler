@@ -2,11 +2,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "es2020",
-    "useDefineForClassFields": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "jsx": "preserve",
-    "sourceMap": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -15,15 +12,15 @@
       "esnext",
       "dom"
     ],
+    "outDir": "dist",
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "type/**/*",
-    "vite.config.ts",
+    "./*.ts"
   ],
   "exclude": [
     "node_modules",

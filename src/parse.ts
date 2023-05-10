@@ -9,9 +9,11 @@ const STATE = {
 
 export const parse = (template: string) => {
     const tokens = tokenize(template)
-    console.log('\n****************template转换为tokens****************\n', tokens);
+    console.log('\n****************template转换为tokens****************\n', JSON.parse(JSON.stringify(tokens)));
+
     const ast = generateAST(tokens)
     console.log('\n****************tokens转换为ast****************\n', ast);
+
 
     console.log('\n****************输出ast对应的结构****************\n');
     dump(ast)
