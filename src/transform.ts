@@ -1,9 +1,52 @@
+/**
+ * 
+模板：
+<div><p>Vue</p><p>Template</p></div>
+
+模板AST:
+{
+    type: 'Root',
+    children : [
+        type: 'Element',
+        tag: 'div',
+        children: [
+            {
+                type: 'Element',
+                tag: 'p',
+                children: [
+                    {
+                        type: 'Text',
+                        content: 'vue'
+                    }
+                ]
+            },
+            ...
+        ]
+    ]
+}
+
+js ast:
+    ?
+
+
+渲染函数：
+function renderFn(){
+    return h('div', [
+        h('p', 'vue'),
+        h('p', 'template'),
+    ])
+}
+
+ */
+import { createStringLiteral, createIdentifier, createArrayExpression, createCallExpression } from './transform/createExpression'
+
 export const transform = (ast) => {
     const content: transformCtx = {
         currentNode: null, // 当前转换节点
         childIndex: 0, // 当前转换节点在父节点的children中的位置索引
         parent: null, // 当前转换节点的父节点
         nodeTransforms: [
+            transformRoot,
             transformElement,
             transformText
         ],
@@ -24,6 +67,7 @@ export const transform = (ast) => {
 
     console.log('\n****************transform转换后对应的ast结构****************\n');
     dump(ast);
+    console.log(ast);
 }
 
 
@@ -71,31 +115,55 @@ function traverseNode(ast: astNode, ctx: transformCtx) {
     }
 }
 
-function transformElement(node) {
-    console.log(`${node.tag}-A-进入阶段执行`)
-    // if (node.type === 'Element' && node.tag === 'p') {
-    //     node.tag = 'h1'
-    // }
+/** 生成对元素节点的 js描述 */
+function transformElement(node: astNode, ctx: transformCtx) {
+    // 放在退出阶段的回调中，确保该节点下的子节点均已处理完毕（已生成对应的jsNode描述）
     return () => {
-        console.log(`${node.tag}-A-退出阶段执行`)
+        if (node.type !== 'Element') return
+
+        // 对于节点而言，其对应的语句为  h('div', 'xxx' or [ ...] )  函数名：h  形参： 形参1 'tag名'   形参2  '子节点 或 文本'
+        const callExp = createCallExpression('h', [createStringLiteral(node.tag)]) // h('div')
+        node.children.length === 1
+            // 单个子节点 （文本信息） -->  h('div', 'vue')
+            ? callExp.arguments.push(node.children[0].jsNode)
+            // 多个子节点   -->  h('div', [h(...)， 'xxx', ...])
+            : callExp.arguments.push(
+                createArrayExpression(node.children.map(i => i.jsNode))
+            )
+
+        node.jsNode = callExp
+
     }
 }
 
+/** 生成对文本节点的 js描述 */
 function transformText(node: astNode, ctx: transformCtx) {
-    console.log(`${node.tag}-B-进入阶段执行`)
-    // if (node.type === 'Text') {
-    //     node.content = node.content.repeat(2)
-    //     // 替换节点测试
-    //     // ctx.replaceNode({
-    //     //     type: 'Element',
-    //     //     tag: 'span'
-    //     // }, ctx)
+    if (node.type !== 'Text') return
+    node.jsNode = createStringLiteral(node.content)
 
-    //     // 删除节点测试
-    //     // ctx.removeNode(node, ctx)
+    // return () => {
+    //     console.log(`${node.tag}-B-退出阶段执行`)
     // }
+}
 
+/** 生成根节点对应的渲染函数最外层的js描述 */
+function transformRoot(node: astNode) {
     return () => {
-        console.log(`${node.tag}-B-退出阶段执行`)
+        if (node.type !== 'Root') return
+
+        // 仅考虑单个根节点的情况
+        const vnodeJSAST = node.children[0].jsNode
+
+        // 生成最外层的函数描述  function render() { return h(...) }
+        node.jsNode = {
+            type: 'FunctionDecl',
+            id: createIdentifier('render'),
+            body: [
+                {
+                    type: 'ReturnStatement',
+                    return: vnodeJSAST
+                }
+            ]
+        }
     }
 }
