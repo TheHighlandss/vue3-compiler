@@ -295,7 +295,7 @@ function genArrayExpression(node, context) {
 }
 function genReturnStatement(node, context) {
   const { push } = context;
-  push("return");
+  push("return ");
   genNode(node.return, context);
 }
 function genStringLiteral(node, context) {

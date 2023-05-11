@@ -37,7 +37,7 @@ export function genArrayExpression(node: astJsNode, context: generateCtx) {
 /** 生成-返回语句对应的js代码 */
 export function genReturnStatement(node: astJsNode, context: generateCtx) {
     const { push } = context
-    push('return')
+    push('return ')
     genNode(node.return, context)
 }
 
