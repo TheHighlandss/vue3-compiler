@@ -9,8 +9,6 @@ export const compiler = (template) => {
     // 2. 转化成javascript ast， 这是对代码的描述
     transform(templateAST)
 
-
-
     // 3. 生成渲染函数
     const code = generate(templateAST.jsNode)
 

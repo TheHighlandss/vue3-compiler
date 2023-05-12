@@ -1,12 +1,3 @@
-const STATE = {
-    initial: 1,
-    tagOpen: 2,
-    tagName: 3,
-    text: 4,
-    tagEnd: 5,
-    tagEndName: 6,
-}
-
 export const parse = (template: string): astNode => {
     const tokens = tokenize(template)
     console.log('\n****************template转换为tokens****************\n', JSON.parse(JSON.stringify(tokens)));
@@ -20,9 +11,19 @@ export const parse = (template: string): astNode => {
     return ast
 }
 
-
+/** 是否是字母 */
 function isAlpha(char: string) {
     return /^[a-zA-Z]$/.test(char)
+}
+
+// 状态机状态
+const STATE = {
+    initial: 1,
+    tagOpen: 2,
+    tagName: 3,
+    text: 4,
+    tagEnd: 5,
+    tagEndName: 6,
 }
 
 /** 模板标记化 */
@@ -119,6 +120,7 @@ function tokenize(str: string): token[] {
     return results
 }
 
+/** 生成模板ast */
 function generateAST(tokens: token[]) {
     const root = {
         type: 'Root',
