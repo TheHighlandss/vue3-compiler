@@ -5,6 +5,8 @@ import { generate } from "./generate"
 export const compiler = (template) => {
     // 1. 生成template ast ，template ast是对模板的描述
     const templateAST = parse(template)
+    console.log('templateAST', templateAST);
+    return
 
     // 2. 转化成javascript ast， 这是对代码的描述
     transform(templateAST)

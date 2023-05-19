@@ -43,3 +43,27 @@ declare interface generateCtx {
     indent: () => void
     deIndent: () => void
 }
+
+/** new parse */
+
+declare interface TextModes {
+    DATA: 'DATA',
+    RCDATA: 'RCDATA',
+    RAWTEXT: 'RAWTEXT',
+    CDATA: 'CDATA',
+}
+
+declare interface parseCtx {
+    source: string,
+    mode: 'DATA' | 'RCDATA' | 'RAWTEXT' | 'CDATA'
+    advanceBy: (a: number) => void
+    advanceSpaces: (...args) => void
+}
+
+declare interface tagElement {
+    type: 'Element',
+    tag: string,
+    props: unknown[]
+    children: any
+    isSelfClosing: boolean
+}
