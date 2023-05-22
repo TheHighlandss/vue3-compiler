@@ -116,6 +116,7 @@ function parseElement(ctx: parseCtx, ancestors) {
     return element
 }
 
+/** 解析标签 */
 function parseTag(ctx: parseCtx, type: 'start' | 'end' = 'start'): tagElement {
     const { advanceBy, advanceSpaces } = ctx
     /**
@@ -133,6 +134,7 @@ function parseTag(ctx: parseCtx, type: 'start' | 'end' = 'start'): tagElement {
     advanceSpaces()
 
     // 属性处理？
+    const props = parseAttributes(ctx)
 
     const isSelfClosing = ctx.source.startsWith('/>')
     // 消费 /> or >
@@ -141,10 +143,56 @@ function parseTag(ctx: parseCtx, type: 'start' | 'end' = 'start'): tagElement {
     return {
         type: 'Element',
         tag,
-        props: [],
+        props,
         children: [],
         isSelfClosing
     }
+}
+
+/** 解析属性 */
+function parseAttributes(ctx: parseCtx): any[] {
+    const { advanceBy, advanceSpaces } = ctx
+    const props = []
+
+    while (!(ctx.source.startsWith('>') || ctx.source.startsWith('/>'))) {
+        const match = /^[^\t\r\n\f >/][^\t\r\n\f >/=]*/.exec(ctx.source)
+        const name = match[0]
+        advanceBy(name.length)
+        advanceSpaces()
+        advanceBy(1) // 消费等于号=
+        advanceSpaces()
+
+        let value = ''
+        const quote = ctx.source[0] // 获取模板的第一个字符，看是否是引号 " or '
+        const isQuote = quote === '"' || quote === "'"
+
+        // 属性值有引号
+        if (isQuote) {
+            advanceBy(1)
+            const endQuoteIndex = ctx.source.indexOf(quote)
+            if (endQuoteIndex > -1) {
+                value = ctx.source.slice(0, endQuoteIndex)
+                advanceBy(value.length)  // 是否要考虑属性值前后的空格？
+                advanceBy(1) // 消费结束引号
+            } else {
+                console.error(`${name}属性值缺少结束引号`)
+            }
+        }
+        // 属性值无引号
+        else {
+            const match = /^[^\t\r\n\f >/]+/.exec(ctx.source) // 到下一个空白字符前的内容作为属性值
+            value = match[0]
+            advanceBy(value.length)
+        }
+
+        advanceSpaces()
+        props.push({
+            type: 'Attribute',
+            name,
+            value,
+        })
+    }
+    return props
 }
 
 function parseComment(ctx) {
