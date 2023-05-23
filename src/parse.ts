@@ -164,7 +164,7 @@ function parseAttributes(ctx: parseCtx): attributeItem[] {
         const name = match[0]
         advanceBy(name.length)
         advanceSpaces()
-        advanceBy(1) // 消费等于号=
+        advanceBy('='.length) // 消费等于号=
         advanceSpaces()
 
         let value = ''
@@ -223,11 +223,6 @@ function parseText(ctx: parseCtx) {
     }
 }
 
-
-function parseComment(ctx: parseCtx) {
-    return []
-}
-
 /** 解析插值 */
 function parseInterpolation(ctx: parseCtx) {
     const { advanceBy } = ctx
@@ -246,6 +241,20 @@ function parseInterpolation(ctx: parseCtx) {
             type: 'Expression',
             content
         }
+    }
+}
+
+/** 解析注释 */
+function parseComment(ctx: parseCtx) {
+    const { advanceBy } = ctx
+    advanceBy('<!--'.length)
+    const closeIndex = ctx.source.indexOf('-->')
+    const content = ctx.source.slice(0, closeIndex)
+    advanceBy(content.length)
+    advanceBy('-->'.length)
+    return {
+        type: 'Comment',
+        content
     }
 }
 
