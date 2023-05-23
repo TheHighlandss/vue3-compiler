@@ -150,7 +150,7 @@ function parseTag(ctx: parseCtx, type: 'start' | 'end' = 'start'): tagElement {
 }
 
 /** 解析属性 */
-function parseAttributes(ctx: parseCtx): any[] {
+function parseAttributes(ctx: parseCtx): attributeItem[] {
     const { advanceBy, advanceSpaces } = ctx
     const props = []
 
@@ -195,18 +195,37 @@ function parseAttributes(ctx: parseCtx): any[] {
     return props
 }
 
-function parseComment(ctx) {
+/** 解析文本 */
+function parseText(ctx: parseCtx) {
+    let endIndex = ctx.source.length // 默认剩余内容全为文字
+    const ltIndex = ctx.source.indexOf('<')  // xxx <
+    const delimiterIndex = ctx.source.indexOf('{{')  // xxx {{
+    if (ltIndex > -1 && ltIndex < endIndex) {
+        endIndex = ltIndex
+    }
+    if (delimiterIndex > -1 && delimiterIndex < endIndex) {
+        endIndex = delimiterIndex
+    }
+
+    const content = ctx.source.slice(0, endIndex)
+    ctx.advanceBy(content.length)
+
+    return {
+        type: 'Text',
+        content
+    }
+}
+
+
+function parseComment(ctx: parseCtx) {
     return []
 }
 
 
-function parseInterpolation(ctx) {
+function parseInterpolation(ctx: parseCtx) {
     return []
 }
 
-function parseText(ctx) {
-    return []
-}
 
 
 

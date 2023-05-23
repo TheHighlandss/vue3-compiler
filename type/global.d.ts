@@ -60,6 +60,12 @@ declare interface parseCtx {
     advanceSpaces: (...args) => void
 }
 
+declare interface attributeItem {
+    type: string,
+    name: string,
+    value: string
+}
+
 declare interface tagElement {
     type: 'Element',
     tag: string,
