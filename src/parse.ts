@@ -33,8 +33,9 @@ export const parse = (template: string): astNode => {
 // ancestors - 节点栈（状态机栈），每遇到一个节点开始标签，就会将其压入栈中（同时开启一个状态机）；遇到该节点的结束标签，弹出栈（对应的状态机停止 ）。
 function parseChildren(ctx: parseCtx, ancestors): tagElement[] {
     let nodes = [] // 存储子节点
-    const { source, mode } = ctx
+    // const { source, mode } = ctx   // book: error position
     while (!isEnd(ctx, ancestors)) {
+        const { source, mode } = ctx
         let node
         if (mode === TextModes.DATA || mode === TextModes.RCDATA) {
             // 遇到 <xxx  or  <!-- xxx
@@ -60,8 +61,10 @@ function parseChildren(ctx: parseCtx, ancestors): tagElement[] {
                     node = parseElement(ctx, ancestors)
                 }
             }
-        } else if (source.startsWith('{{')) {
-            node = parseInterpolation(ctx)
+            // 遇到插值语法 {{ }}
+            else if (source.startsWith('{{')) {
+                node = parseInterpolation(ctx)
+            }
         }
 
         if (!node) {
@@ -110,7 +113,9 @@ function parseElement(ctx: parseCtx, ancestors) {
     if (ctx.source.startsWith(`</${element.tag}`)) {
         parseTag(ctx, 'end')
     } else {
-        console.error(`${element.tag} 缺少闭合标签`);
+        // console.error(`${element.tag} 缺少闭合标签`);
+        throw new Error(`${element.tag} 缺少闭合标签`)
+
     }
 
     return element
@@ -175,7 +180,9 @@ function parseAttributes(ctx: parseCtx): attributeItem[] {
                 advanceBy(value.length)  // 是否要考虑属性值前后的空格？
                 advanceBy(1) // 消费结束引号
             } else {
-                console.error(`${name}属性值缺少结束引号`)
+                // console.error(`${name}属性值缺少结束引号`)
+                throw new Error(`${name}属性值缺少结束引号`)
+
             }
         }
         // 属性值无引号
@@ -212,7 +219,7 @@ function parseText(ctx: parseCtx) {
 
     return {
         type: 'Text',
-        content
+        content //  省略解析html实体 decodeHtml(content)
     }
 }
 
@@ -221,9 +228,25 @@ function parseComment(ctx: parseCtx) {
     return []
 }
 
-
+/** 解析插值 */
 function parseInterpolation(ctx: parseCtx) {
-    return []
+    const { advanceBy } = ctx
+    advanceBy('{{'.length)
+    const closeIndex = ctx.source.indexOf('}}')
+    if (closeIndex < 0) {
+        // console.error('缺少结束定界符 }} ');
+        throw new Error('缺少结束定界符 }} ')
+    }
+    const content = ctx.source.slice(0, closeIndex)
+    advanceBy(content.length)
+    advanceBy('}}'.length)
+    return {
+        type: 'Interpolation',
+        content: {
+            type: 'Expression',
+            content
+        }
+    }
 }
 
 
