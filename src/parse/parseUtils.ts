@@ -3,6 +3,7 @@ import { parseChildren } from '../parse'
 
 /** 解析标签节点 */
 export function parseElement(ctx: parseCtx, ancestors) {
+    // 1.解析起始标签
     const element: tagElement = parseTag(ctx)
     if (element.isSelfClosing) return element
 
@@ -14,15 +15,16 @@ export function parseElement(ctx: parseCtx, ancestors) {
         ctx.mode = TextModes.DATA
     }
 
+    // 2.解析标签内容实体
     ancestors.push(element)
-    element.children = parseChildren(ctx, ancestors)
-    ancestors.pop()  //  todo: ?
+    element.children = parseChildren(ctx, ancestors) // 新状态机开启：解析标签内容
+    ancestors.pop()  // 子节点解析完成，即表示当前节点的内容解析完成 --> 弹出栈
 
 
+    // 3.解析结束标签
     if (ctx.source.startsWith(`</${element.tag}`)) {
         parseTag(ctx, 'end')
     } else {
-        // console.error(`${element.tag} 缺少闭合标签`);
         throw new Error(`${element.tag} 缺少闭合标签`)
 
     }
@@ -47,7 +49,7 @@ export function parseTag(ctx: parseCtx, type: 'start' | 'end' = 'start'): tagEle
     // 消费空字符
     advanceSpaces()
 
-    // 属性处理？
+    // 属性处理
     const props = parseAttributes(ctx)
 
     const isSelfClosing = ctx.source.startsWith('/>')
@@ -138,7 +140,6 @@ export function parseInterpolation(ctx: parseCtx) {
     advanceBy('{{'.length)
     const closeIndex = ctx.source.indexOf('}}')
     if (closeIndex < 0) {
-        // console.error('缺少结束定界符 }} ');
         throw new Error('缺少结束定界符 }} ')
     }
     const content = ctx.source.slice(0, closeIndex)
