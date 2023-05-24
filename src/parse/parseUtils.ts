@@ -73,8 +73,13 @@ export function parseAttributes(ctx: parseCtx): attributeItem[] {
         const name = match[0]
         advanceBy(name.length)
         advanceSpaces()
-        advanceBy('='.length) // 消费等于号=
-        advanceSpaces()
+
+        const iskeyValueAttribute = ctx.source.startsWith('=') // 是否是键值对类型的属性 （非布尔类型属性，如disabled）
+
+        if (iskeyValueAttribute) {
+            advanceBy('='.length) // 消费等于号=
+            advanceSpaces()
+        }
 
         let value = ''
         const quote = ctx.source[0] // 获取模板的第一个字符，看是否是引号 " or '
@@ -94,8 +99,8 @@ export function parseAttributes(ctx: parseCtx): attributeItem[] {
 
             }
         }
-        // 属性值无引号
-        else {
+        // 属性值无引号 且是键值对类型的属性
+        else if (iskeyValueAttribute) {
             const match = /^[^\t\r\n\f >/]+/.exec(ctx.source) // 到下一个空白字符前的内容作为属性值
             value = match[0]
             advanceBy(value.length)
