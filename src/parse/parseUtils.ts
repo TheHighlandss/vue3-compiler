@@ -108,7 +108,7 @@ export function parseAttributes(ctx: parseCtx): attributeItem[] {
 
         advanceSpaces()
         props.push({
-            type: 'Attribute',
+            type: /^(:|v-|@)/.test(name) ? 'Directive' : 'Attribute', // 简单区分指令与属性
             name,
             value,
         })
