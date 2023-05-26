@@ -2,15 +2,16 @@ import { TextModes } from './parse/constants'
 import { parseElement, parseText, parseInterpolation, parseComment } from './parse/parseUtils'
 
 export const parse = (template: string): astNode => {
+    // 1. 创建上下文
     const context: parseCtx = {
         source: template,
         mode: TextModes.DATA,
+        /** 消费指定长度的字符 */
         advanceBy(num) {
-            // 消费字符
             context.source = context.source.slice(num)
         },
+        /** 消费空白字符 */
         advanceSpaces() {
-            // 匹配空白字符
             const match = /^[\t\r\n\f ]+/.exec(context.source)
             if (match) {
                 context.advanceBy(match[0].length)
@@ -18,7 +19,9 @@ export const parse = (template: string): astNode => {
         },
     }
 
+    // 2. 解析实体
     const nodes: tagElement[] = parseChildren(context, [])
+
 
     return {
         type: 'Root',
@@ -68,6 +71,7 @@ export function parseChildren(ctx: parseCtx, ancestors): tagElement[] {
             }
         }
 
+        // node仍为空，则按照文本内容解析
         if (!node) {
             node = parseText(ctx)
         }
@@ -83,7 +87,7 @@ function isEnd(ctx: parseCtx, ancestors: any[]) {
     // 1.模板字符消耗完毕
     if (!ctx.source) return true
 
-    // 2.栈中存在同名的结束标签，就停止状态机   todo: ?
+    // 2.栈中存在同名的结束标签，就停止状态机
     for (let i = ancestors.length - 1; i >= 0; i--) {
         if (ctx.source.startsWith(`</${ancestors[i].tag}`)) {
             return true

@@ -3,6 +3,7 @@ import { parseChildren } from '../parse'
 
 /** 解析标签节点 */
 export function parseElement(ctx: parseCtx, ancestors) {
+    // 1. 解析开始标签
     const element: tagElement = parseTag(ctx)
     if (element.isSelfClosing) return element
 
@@ -14,17 +15,17 @@ export function parseElement(ctx: parseCtx, ancestors) {
         ctx.mode = TextModes.DATA
     }
 
+    // 2. 解析标签内容
     ancestors.push(element)
     element.children = parseChildren(ctx, ancestors)
-    ancestors.pop()  //  todo: ?
+    ancestors.pop()  //  解析完成即表示当前节点内容已解析完成 --> 弹出栈
 
 
+    // 3. 解析结束标签
     if (ctx.source.startsWith(`</${element.tag}`)) {
         parseTag(ctx, 'end')
     } else {
-        // console.error(`${element.tag} 缺少闭合标签`);
         throw new Error(`${element.tag} 缺少闭合标签`)
-
     }
 
     return element
@@ -47,7 +48,7 @@ export function parseTag(ctx: parseCtx, type: 'start' | 'end' = 'start'): tagEle
     // 消费空字符
     advanceSpaces()
 
-    // 属性处理？
+    // 属性处理
     const props = parseAttributes(ctx)
 
     const isSelfClosing = ctx.source.startsWith('/>')
@@ -69,6 +70,7 @@ export function parseAttributes(ctx: parseCtx): attributeItem[] {
     const props = []
 
     while (!(ctx.source.startsWith('>') || ctx.source.startsWith('/>'))) {
+        // 1. 提取name 
         const match = /^[^\t\r\n\f >/][^\t\r\n\f >/=]*/.exec(ctx.source)
         const name = match[0]
         advanceBy(name.length)
@@ -81,6 +83,7 @@ export function parseAttributes(ctx: parseCtx): attributeItem[] {
             advanceSpaces()
         }
 
+        // 2. 提取value
         let value = ''
         const quote = ctx.source[0] // 获取模板的第一个字符，看是否是引号 " or '
         const isQuote = quote === '"' || quote === "'"
@@ -94,7 +97,6 @@ export function parseAttributes(ctx: parseCtx): attributeItem[] {
                 advanceBy(value.length)  // 是否要考虑属性值前后的空格？
                 advanceBy(1) // 消费结束引号
             } else {
-                // console.error(`${name}属性值缺少结束引号`)
                 throw new Error(`${name}属性值缺少结束引号`)
 
             }
@@ -143,7 +145,6 @@ export function parseInterpolation(ctx: parseCtx) {
     advanceBy('{{'.length)
     const closeIndex = ctx.source.indexOf('}}')
     if (closeIndex < 0) {
-        // console.error('缺少结束定界符 }} ');
         throw new Error('缺少结束定界符 }} ')
     }
     const content = ctx.source.slice(0, closeIndex)
